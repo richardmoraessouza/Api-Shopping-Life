@@ -3,20 +3,23 @@
     "axios": "^1.12.2",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "express-fileupload": "^1.5.2",
     "express-handlebars": "^8.0.3",
-    "mysql": "^2.18.1",
-    "mysql2": "^3.15.2"
+    "mysql2": "^3.15.3"
   },
   "name": "backend",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": ""
 }
+

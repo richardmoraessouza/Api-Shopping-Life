@@ -1,15 +1,13 @@
 import db from './db.js';
 import express, { Router } from 'express';
 import cors from 'cors';
-import axios from "axios"
 
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-
 
 app.post('/carrinho', (req, res) => {
   const { usuario_id, produto_id, quantidade } = req.body;
