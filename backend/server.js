@@ -1,12 +1,47 @@
-import db from './db.js';  // pool do pg
+import db from './db.js'; 
 import express from 'express';
+// import fetch from 'node-fetch'
 import cors from 'cors';
+
 
 const PORT = process.env.PORT || 3000;
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+
+
+// caso eu queria adicionar uma nova api de produtos
+// async function importarProdutos() {
+//   try {
+//     const res = await fetch('https://fakestoreapi.com/products');
+//     const produtos = await res.json();
+
+//     for (const prod of produtos) {
+//       const { title, image, price, description, category } = prod;
+
+//       await db.query(
+//         `INSERT INTO produtos (title, image, price, description, category)
+//          VALUES ($1, $2, $3, $4, $5)
+//          ON CONFLICT DO NOTHING`,   // opcional, se quiser evitar duplicados
+//         [ title, image, price, description, category ]
+//       );
+//       console.log(`Inserido: ${title}`);
+//     }
+
+//     console.log('Importação completa.');
+//   } catch (err) {
+//     console.error('Erro ao importar produtos:', err);
+//   } finally {
+//     // se quiser fechar pool/conexão
+//     // await db.end();
+//   }
+// }
+
+// importarProdutos();
+
+
 
 // Adicionar item ao carrinho
 app.post('/carrinho', async (req, res) => {
