@@ -1,7 +1,6 @@
-import db from './db.js';
-import express, { Router } from 'express';
+import db from './db.js';  // pool do pg
+import express from 'express';
 import cors from 'cors';
-
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -9,69 +8,79 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.post('/carrinho', (req, res) => {
-  const { usuario_id, produto_id, quantidade } = req.body;
+// Adicionar item ao carrinho
+app.post('/carrinho', async (req, res) => {
+  const { usuario_id, produto_id, quantidade = 1 } = req.body;
 
-  db.query(
-    'INSERT INTO carrinho (usuarios_id, produtos_id, quantidade) VALUES (?, ?, ?)',
-    [usuario_id, produto_id, quantidade || 1],
-    (err, results) => {
-      if (err) {
-        console.error('Erro ao inserir no carrinho:', err);
-        return res.status(500).json(err);
-      }
-      res.status(201).json({ message: 'Adicionado ao carrinho com sucesso' });
-    }
-  );
+  try {
+    await db.query(
+      'INSERT INTO carrinho (usuarios_id, produtos_id, quantidade) VALUES ($1, $2, $3)',
+      [usuario_id, produto_id, quantidade]
+    );
+    res.status(201).json({ message: 'Adicionado ao carrinho com sucesso' });
+  } catch (err) {
+    console.error('Erro ao inserir no carrinho:', err);
+    res.status(500).json({ error: 'Erro ao inserir no carrinho' });
+  }
 });
 
-app.get('/carrinho/:usuarioId', (req, res) => {
+// Buscar carrinho do usuário
+app.get('/carrinho/:usuarioId', async (req, res) => {
   const usuarioId = req.params.usuarioId;
 
   const query = `
     SELECT c.id, c.quantidade, p.title, p.price, p.image
     FROM carrinho c
     JOIN produtos p ON c.produtos_id = p.id
-    WHERE c.usuarios_id = ?
+    WHERE c.usuarios_id = $1
   `;
 
-  db.query(query, [usuarioId], (err, results) => {
-    if (err) {
-      console.error('Erro ao buscar carrinho:', err);
-      return res.status(500).json({ error: 'Erro ao buscar carrinho' });
-    }
-    res.json(results); 
-  });
+  try {
+    const { rows } = await db.query(query, [usuarioId]);
+    res.json(rows);
+  } catch (err) {
+    console.error('Erro ao buscar carrinho:', err);
+    res.status(500).json({ error: 'Erro ao buscar carrinho' });
+  }
 });
 
-app.get('/produtos', (req, res) => {
-  db.query('SELECT * FROM produtos', (err, results) => {
-    if (err) return res.status(500).json(err);
-    res.json(results);
-  });
+// Listar produtos
+app.get('/produtos', async (req, res) => {
+  try {
+    const { rows } = await db.query('SELECT * FROM produtos');
+    res.json(rows);
+  } catch (err) {
+    console.error('Erro ao buscar produtos:', err);
+    res.status(500).json({ error: 'Erro ao buscar produtos' });
+  }
 });
 
-
-// faz entrar no usuário já existente
-app.get('/', (req, res) => {
-  db.query('SELECT * FROM usuarios', (err, results) => {
-    if (err) return res.status(500).json(err);
-    res.json(results);
-  });
-});;
-
-
-// adicionar um novo usuário
-app.post('/', (req, res) => {
-  const { gmail , senha , nome} = req.body;
-  db.query('INSERT INTO usuarios (gmail, senha, nome) VALUES (?, ?, ?)', [gmail, senha, nome], (err, results) => {
-    if (err) return res.status(500).json(err);
-    res.json({ id: results.insertId, gmail, senha, nome})
-  });
+// Listar usuários
+app.get('/usuarios', async (req, res) => {
+  try {
+    const { rows } = await db.query('SELECT * FROM usuarios');
+    res.json(rows);
+  } catch (err) {
+    console.error('Erro ao buscar usuários:', err);
+    res.status(500).json({ error: 'Erro ao buscar usuários' });
+  }
 });
 
-
+// Adicionar novo usuário
+app.post('/usuarios', async (req, res) => {
+  const { gmail, senha, nome } = req.body;
+  try {
+    const result = await db.query(
+      'INSERT INTO usuarios (gmail, senha, nome) VALUES ($1, $2, $3) RETURNING id',
+      [gmail, senha, nome]
+    );
+    res.status(201).json({ id: result.rows[0].id, gmail, nome });
+  } catch (err) {
+    console.error('Erro ao adicionar usuário:', err);
+    res.status(500).json({ error: 'Erro ao adicionar usuário' });
+  }
+});
 
 app.listen(PORT, () => {
-    console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
