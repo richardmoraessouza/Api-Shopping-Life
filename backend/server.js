@@ -4,15 +4,13 @@ import express from 'express';
 import cors from 'cors';
 
 
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
 
-
-// caso eu queria adicionar uma nova api de produtos
 // async function importarProdutos() {
 //   try {
 //     const res = await fetch('https://fakestoreapi.com/products');
@@ -22,7 +20,7 @@ app.use(express.json());
 //       const { title, image, price, description, category } = prod;
 
 //       await db.query(
-//         `INSERT INTO produtos (title, image, price, description, category)
+//         `INSERT INTO shoppinglife.produtos (title, image, price, description, category)
 //          VALUES ($1, $2, $3, $4, $5)
 //          ON CONFLICT DO NOTHING`,   // opcional, se quiser evitar duplicados
 //         [ title, image, price, description, category ]
@@ -41,15 +39,13 @@ app.use(express.json());
 
 // importarProdutos();
 
-
-
 // Adicionar item ao carrinho
 app.post('/carrinho', async (req, res) => {
   const { usuario_id, produto_id, quantidade = 1 } = req.body;
 
   try {
     await db.query(
-      'INSERT INTO carrinho (usuarios_id, produtos_id, quantidade) VALUES ($1, $2, $3)',
+      'INSERT INTO shoppinglife.carrinho (usuarios_id, produtos_id, quantidade) VALUES ($1, $2, $3)',
       [usuario_id, produto_id, quantidade]
     );
     res.status(201).json({ message: 'Adicionado ao carrinho com sucesso' });
@@ -65,8 +61,8 @@ app.get('/carrinho/:usuarioId', async (req, res) => {
 
   const query = `
     SELECT c.id, c.quantidade, p.title, p.price, p.image
-    FROM carrinho c
-    JOIN produtos p ON c.produtos_id = p.id
+    FROM shoppinglife.carrinho c
+    JOIN shoppinglife.produtos p ON c.produtos_id = p.id
     WHERE c.usuarios_id = $1
   `;
 
@@ -82,7 +78,7 @@ app.get('/carrinho/:usuarioId', async (req, res) => {
 // Listar produtos
 app.get('/produtos', async (req, res) => {
   try {
-    const { rows } = await db.query('SELECT * FROM produtos');
+    const { rows } = await db.query('SELECT * FROM shoppinglife.produtos');
     res.json(rows);
   } catch (err) {
     console.error('Erro ao buscar produtos:', err);
@@ -93,7 +89,7 @@ app.get('/produtos', async (req, res) => {
 // Listar usuários
 app.get('/usuarios', async (req, res) => {
   try {
-    const { rows } = await db.query('SELECT * FROM usuarios');
+    const { rows } = await db.query('SELECT * FROM shoppinglife.usuarios');
     res.json(rows);
   } catch (err) {
     console.error('Erro ao buscar usuários:', err);
@@ -106,7 +102,7 @@ app.post('/usuarios', async (req, res) => {
   const { gmail, senha, nome } = req.body;
   try {
     const result = await db.query(
-      'INSERT INTO usuarios (gmail, senha, nome) VALUES ($1, $2, $3) RETURNING id',
+      'INSERT INTO shoppinglife.usuarios (gmail, senha, nome) VALUES ($1, $2, $3) RETURNING id',
       [gmail, senha, nome]
     );
     res.status(201).json({ id: result.rows[0].id, gmail, nome });

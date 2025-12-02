@@ -1,4 +1,3 @@
-// db.js ou connection.js
 import pkg from 'pg';
 import dotenv from 'dotenv';
 
@@ -7,19 +6,21 @@ dotenv.config();
 const { Pool } = pkg;
 
 const pool = new Pool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
-  ssl: { rejectUnauthorized: false }
+  host: process.env.PGHOST,
+  port: 5432,
+  user: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
+  database: process.env.PGDATABASE,
+  ssl: { rejectUnauthorized: false } 
 });
 
-
+// Testa a conexão
 pool.connect((err, client, release) => {
   if (err) {
-    return console.error('❌ Erro ao conectar ao PostgreSQL:', err.stack);
+    console.error('Erro ao conectar ao banco:', err.stack);
+    return;
   }
-  console.log('✅ Conectado ao banco de dados PostgreSQL!');
+  console.log('Conectado ao banco!');
   release();
 });
 
