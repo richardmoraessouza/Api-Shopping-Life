@@ -2,6 +2,7 @@ import db from './db.js';
 import express from 'express';
 // import fetch from 'node-fetch'
 import cors from 'cors';
+import bcrypt from "bcrypt"
 
 
 const PORT = 3000;
@@ -9,7 +10,6 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-
 
 // async function importarProdutos() {
 //   try {
@@ -40,6 +40,7 @@ app.use(express.json());
 // importarProdutos();
 
 // Adicionar item ao carrinho
+
 app.post('/carrinho', async (req, res) => {
   const { usuario_id, produto_id, quantidade = 1 } = req.body;
 
@@ -100,11 +101,16 @@ app.get('/usuarios', async (req, res) => {
 // Adicionar novo usuário
 app.post('/usuarios', async (req, res) => {
   const { gmail, senha, nome } = req.body;
+
   try {
+    const saltRounds = 10;
+    const senhaHash = await bcrypt.hash(senha, saltRounds)
+
     const result = await db.query(
       'INSERT INTO shoppinglife.usuarios (gmail, senha, nome) VALUES ($1, $2, $3) RETURNING id',
-      [gmail, senha, nome]
+      [gmail, senhaHash, nome]
     );
+
     res.status(201).json({ id: result.rows[0].id, gmail, nome });
   } catch (err) {
     console.error('Erro ao adicionar usuário:', err);
