@@ -87,7 +87,7 @@ app.get('/carrinho/:usuarioId', async (req, res) => {
   const usuarioId = req.params.usuarioId;
 
   const query = `
-    SELECT c.id, c.quantidade, p.title, p.price, p.images
+    SELECT c.id, c.quantidade, p.title, p.price, p.produtos_id, p.images
     FROM shoppinglife.carrinho c
     JOIN shoppinglife.produtos p ON c.produtos_id = p.id
     WHERE c.usuarios_id = $1
