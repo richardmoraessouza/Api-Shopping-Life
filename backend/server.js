@@ -11,35 +11,61 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// async function importarProdutos() {
+// async function importarProdutosDummy() {
 //   try {
-//     const res = await fetch('https://fakestoreapi.com/products');
-//     const produtos = await res.json();
+//     // Pegando todos os produtos (limit=0 traz a lista completa)
+//     const res = await fetch('https://dummyjson.com/products?limit=0');
+//     const data = await res.json();
+//     const produtos = data.products;
 
 //     for (const prod of produtos) {
-//       const { title, image, price, description, category } = prod;
+//       // Desestruturando a API conforme a interface que você mandou
+//       const {
+//         title, description, category, price, discountPercentage,
+//         rating, stock, brand, sku, weight, dimensions,
+//         warrantyInformation, shippingInformation, availabilityStatus,
+//         returnPolicy, minimumOrderQuantity, thumbnail, images,
+//         reviews, meta, tags
+//       } = prod;
 
 //       await db.query(
-//         `INSERT INTO shoppinglife.produtos (title, image, price, description, category)
-//          VALUES ($1, $2, $3, $4, $5)
-//          ON CONFLICT DO NOTHING`,   // opcional, se quiser evitar duplicados
-//         [ title, image, price, description, category ]
-//       );
-//       console.log(`Inserido: ${title}`);
+//   `INSERT INTO shoppinglife.produtos (
+//     title, description, category, price, discountpercentage, 
+//     rating, stock, brand, sku, weight, 
+//     width, height, depth, 
+//     warrantyinformation, shippinginformation, availabilitystatus, 
+//     returnpolicy, minimumorderquantity, 
+//     thumbnail, images, reviews, tags, 
+//     createdat, updatedat, barcode, qrcode
+//   ) VALUES (
+//     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 
+//     $11, $12, $13, $14, $15, $16, $17, $18, 
+//     $19, $20, $21, $22, $23, $24, $25, $26
+//   ) ON CONFLICT DO NOTHING`, // Se der erro de duplicata, ele apenas pula o item
+//   [
+//     title, description, category, price, discountPercentage,
+//     rating, stock, brand, sku, weight,
+//     dimensions.width, dimensions.height, dimensions.depth,
+//     warrantyInformation, shippingInformation, availabilityStatus,
+//     returnPolicy, minimumOrderQuantity,
+//     thumbnail, 
+//     JSON.stringify(images),
+//     JSON.stringify(reviews),
+//     JSON.stringify(tags),
+//     meta.createdAt, meta.updatedAt, meta.barcode, meta.qrCode
+//   ]
+// );
+      
+//       console.log(`✅ Inserido/Atualizado: ${title}`);
 //     }
 
-//     console.log('Importação completa.');
+//     console.log('🚀 Importação da DummyJSON completa!');
 //   } catch (err) {
-//     console.error('Erro ao importar produtos:', err);
-//   } finally {
-//     // se quiser fechar pool/conexão
-//     // await db.end();
+//     console.error('❌ Erro feio na importação:', err);
 //   }
 // }
 
-// importarProdutos();
-
-// Adicionar item ao carrinho
+// importarProdutosDummy();
 
 app.post('/carrinho', async (req, res) => {
   const { usuario_id, produto_id, quantidade = 1 } = req.body;
@@ -61,7 +87,7 @@ app.get('/carrinho/:usuarioId', async (req, res) => {
   const usuarioId = req.params.usuarioId;
 
   const query = `
-    SELECT c.id, c.quantidade, p.title, p.price, p.image
+    SELECT c.id, c.quantidade, p.title, p.price, p.images
     FROM shoppinglife.carrinho c
     JOIN shoppinglife.produtos p ON c.produtos_id = p.id
     WHERE c.usuarios_id = $1
