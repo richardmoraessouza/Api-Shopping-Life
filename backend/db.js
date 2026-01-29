@@ -2,7 +2,7 @@ import pkg from 'pg';
 import dotenv from 'dotenv';
 
 dotenv.config();
-console.log('Senha do PG:', process.env.PGPASSWORD);
+
 const { Pool } = pkg;
 
 const pool = new Pool({
